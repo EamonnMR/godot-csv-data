@@ -2,7 +2,6 @@
 # simlink it to .csv.txt to make export work, use DataRow.load_csv to load the CSV into dictionaries, then pass each dictionary into your class
 # like YourClass.new(dict) to instantiate a row object.
 
-
 class_name DataRow
 
 func init(data: Dictionary):
@@ -12,6 +11,8 @@ func init(data: Dictionary):
 		if prop_name in data:
 			var type: int = prop["type"]
 			var string_val = data[prop_name]
+			if prop_name == "color":
+				print("Prop name: ", prop_name, " Type Class: ", prop["class_name"], " Type Const: ", prop["type"])
 			set(prop_name, convert_column_value(
 				data[prop_name],
 				prop["type"],
@@ -27,15 +28,13 @@ func convert_column_value(string_val: String, type: int, type_class: String):
 		return float(string_val)
 	elif type == TYPE_STRING:
 		return string_val
+	elif type == TYPE_COLOR:
+		return parse_color(string_val)
 	elif type == TYPE_OBJECT:
-		if type_class in ["PackedScene", "Texture"]:
-			return load(string_val)
-		elif type_class == "Color":
-			return parse_color(string_val)
-		# elif type_class == "AudioStream":
-		# 	return GdScriptAudioImport.loadfile(string_val)
-    # To enable audiostream handling, uncomment and include this project: https://github.com/Gianclgar/GDScriptAudioImport
-			
+		if type_class in ["PackedScene", "Texture", "Resource"]:
+			var loaded = load(string_val)
+			Game.scene_cache[string_val] = loaded
+			return loaded
 	return null
 	
 func parse_color(color_text) -> Color:
@@ -89,6 +88,7 @@ static func load_csv(csv):
 		parsed_file[line[0]] = parsed_line
 	print("Parsed ", csv + ".txt ", "got ", parsed_file.size(), " rows")
 	return parsed_file
+
 	
 # Copyright (c) 2021, Eamonn McHugh-Roohr
 # All rights reserved.
