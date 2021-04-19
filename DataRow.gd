@@ -4,6 +4,10 @@
 
 class_name DataRow
 
+static func get_csv_path():
+	print("Implement _get_csv_path in your subclass")
+	return ""
+
 func init(data: Dictionary):
 	var props = get_property_list()
 	for prop in props:
@@ -11,8 +15,6 @@ func init(data: Dictionary):
 		if prop_name in data:
 			var type: int = prop["type"]
 			var string_val = data[prop_name]
-			if prop_name == "color":
-				print("Prop name: ", prop_name, " Type Class: ", prop["class_name"], " Type Const: ", prop["type"])
 			set(prop_name, convert_column_value(
 				data[prop_name],
 				prop["type"],
@@ -60,6 +62,23 @@ func parse_x_dict(x_dict: String) -> Dictionary:
 		dict[key_count[0]] = int(key_count[1])
 	return dict
 	
+func parse_colon_dict_int_values(colon_dict: String, intify=false) -> Dictionary:
+	""" Looks like 'key: 1; key2: 2' translates to:
+		{
+			"key": 1
+			"key2": 2
+		}
+	"""
+	var dict = {}
+	for kvp in colon_dict.split(";"):
+		var key_value = kvp.split(":")
+		var key = key_value[0].strip_edges()
+		var value = key_value[1].strip_edges()
+		if intify:
+			value = int(value)
+		dict[key] = value
+	return dict
+
 func parse_int_array(text: String) -> Array:
 	var int_array = []
 	for i in text.split(" "):
