@@ -15,7 +15,6 @@ func init(data: Dictionary):
 		if prop_name in data:
 			var type: int = prop["type"]
 			var string_val = data[prop_name]
-			print("Prop name: ", prop_name, " Type Class: ", prop["class_name"], " Type Const: ", prop["type"])
 			set(prop_name, convert_column_value(
 				data[prop_name],
 				prop["type"],
