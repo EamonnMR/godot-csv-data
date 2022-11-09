@@ -34,10 +34,11 @@ func _init(data: Dictionary):
 				string_val,
 				type,
 				prop["class_name"],
-				get(prop_name)
+				get(prop_name),
+				prop
 			))
 
-func convert_column_value(string_val: String, type: int, type_class: String, initial_value):
+func convert_column_value(string_val: String, type: int, type_class: String, initial_value, prop):
 	if type == TYPE_INT:
 		return string_val.to_int()
 	elif type == TYPE_BOOL:
@@ -101,14 +102,15 @@ func parse_colon_dict_int_values(colon_dict: String) -> Dictionary:
 
 func parse_array(string_val, array):
 	if not(array.is_typed()):
-		print("Untyped array: ", string_val)
 		return []
-	match array.get_typed_class_name():
-		"String":
+	
+	# TODO: Handle some custom types with array.get_typed_class_name
+	match array.get_typed_builtin():
+		TYPE_STRING:
 			return parse_string_array(string_val)
-		"int":
+		TYPE_INT:
 			return parse_int_array(string_val)
-	print("Unknown array type: ", array.get_typed_class_name())
+	print("Unknown array type: ", array.get_typed_builtin())
 	return ""
 
 func parse_int_array(text: String) -> Array:
