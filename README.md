@@ -5,4 +5,4 @@ While working on RPGs I found it useful to be able to use a spreadsheet editor t
 
 In short, it lets you do refactors like [this](https://github.com/EamonnMR/mpevmvp/commit/11b095db8ad2501004d96159564bc4a4224ef6a8#diff-555d0a29a33b6d4cde4e4953db393e307e5147cd609d979cafb14e02d9fda144L97), or [this](https://github.com/EamonnMR/mpevmvp/commit/1a9ff71966ac54b428cbe30e2ab5d36eff04af29#diff-555d0a29a33b6d4cde4e4953db393e307e5147cd609d979cafb14e02d9fda144L139). 
 
-Pulled out of https://github.com/EamonnMR/mpevmvp search that project for DataRow to see an example of how it's used. If you check out 
+Pulled out of https://github.com/EamonnMR/mpevmvp search that project for DataRow to see an example of how it's used. Now used in https://github.com/EamonnMR/galactic-night, where it was ported to GD4.
