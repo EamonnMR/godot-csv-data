@@ -22,6 +22,17 @@ func apply_to_node(node: Node):
 			if dat is Dictionary:
 				dat = dat.duplicate()
 			node.set(stat, dat)
+			
+func apply_prefix_to_node(node: Node, prefix):
+	# Similar to apply_to_node except it calls out a prefix within the data.
+	for raw_stat in get_columns():
+		if raw_stat.begins_with(prefix):
+			var stat = raw_stat.replace(prefix + "_", "")
+			if stat in node:
+				var dat = get(stat)
+				if dat is Dictionary:
+					dat = dat.duplicate()
+				node.set(stat, dat)
 
 func _init(data: Dictionary):
 	var props = get_property_list()
@@ -38,7 +49,7 @@ func _init(data: Dictionary):
 				prop
 			))
 
-func convert_column_value(string_val: String, type: int, type_class: String, initial_value, prop):
+func convert_column_value(string_val: String, type: int, type_class: String, initial_value, _prop):
 	if type == TYPE_INT:
 		return string_val.to_int()
 	elif type == TYPE_BOOL:
@@ -51,6 +62,8 @@ func convert_column_value(string_val: String, type: int, type_class: String, ini
 		return parse_color(string_val)
 	elif type == TYPE_ARRAY:
 		return parse_array(string_val, initial_value)
+	elif type == TYPE_VECTOR2:
+		return parse_vector2(string_val)
 	elif type == TYPE_OBJECT:
 		if type_class in ["PackedScene", "Texture2D", "Resource"]:
 			return load(string_val)
@@ -59,24 +72,26 @@ func convert_column_value(string_val: String, type: int, type_class: String, ini
 	return null
 	
 func parse_color(color_text) -> Color:
-	"""
-	Uses the default string constructor, ARGB or RBG
-	"""
+	# Uses the default string constructor, ARGB or RBG
 	var color = Color(color_text)
 	return color
+	
+func parse_vector2(vec2_text) -> Vector2:
+	var vec = vec2_text.split(" ")
+	return Vector2(float(vec[0]), float(vec[1]))
 
 func parse_bool(caps_true_or_false: String) -> bool:
 	return caps_true_or_false == "TRUE"
 	
 func parse_x_dict(x_dict: String) -> Dictionary:
-	""" Looks like: '1x4 0x3' and translates to:
-		{
-			"1": 4,
-			"0": 3
-		}
-		
-		Useful if you want a compact dictionary representation
-	"""
+	#Looks like: '1x4 0x3' and translates to:
+	#	{
+	#		"1": 4,
+	#		"0": 3
+	#	}
+	#	
+	#	Useful if you want a compact dictionary representation
+
 	var dict = {}
 	for i in x_dict.split(" "):
 		var key_count = i.split("x")
@@ -84,12 +99,12 @@ func parse_x_dict(x_dict: String) -> Dictionary:
 	return dict
 	
 func parse_colon_dict_int_values(colon_dict: String) -> Dictionary:
-	""" Looks like 'key: 1; key2: 2' translates to:
-		{
-			"key": 1
-			"key2": 2
-		}
-	"""
+	#Looks like 'key: 1; key2: 2' translates to:
+	#	{
+	#		"key": 1
+	#		"key2": 2
+	#	}
+	#
 	var dict = {}
 	if colon_dict != "":
 		for kvp in colon_dict.split(";"):
@@ -98,6 +113,23 @@ func parse_colon_dict_int_values(colon_dict: String) -> Dictionary:
 				var key = key_value[0].strip_edges()
 				var value = key_value[1].strip_edges()
 				dict[key] = value.to_int()
+	return dict
+	
+func parse_colon_dict_string_values(colon_dict: String) -> Dictionary:
+	#Looks like 'key: val; key2: val2' translates to:
+	#	{
+	#		"key": "val"
+	#		"key2": "val2"
+	#	}
+	#
+	var dict = {}
+	if colon_dict != "":
+		for kvp in colon_dict.split(";"):
+			if kvp != "":
+				var key_value = kvp.split(":")
+				var key = key_value[0].strip_edges()
+				var value = key_value[1].strip_edges()
+				dict[key] = value
 	return dict
 
 func parse_array(string_val, array):
@@ -119,10 +151,10 @@ func parse_int_array(text: String) -> Array:
 		int_array.append(i.to_int())
 	return int_array
 
-func parse_string_array(text: String) -> Array:
+func parse_string_array(text: String) -> Array[String]:
 	# This might be a bug in split()
 	var raw_array = Array(text.split(" "))
-	var processed_array = []
+	var processed_array: Array[String] = []
 	for item in raw_array:
 		if item != "":
 			processed_array.push_back(item)
@@ -130,7 +162,7 @@ func parse_string_array(text: String) -> Array:
 
 static func load_csv(csv):
 	var file = FileAccess.open(csv, FileAccess.READ)
-	if not file.file_exists(csv):
+	if not FileAccess.file_exists(csv):
 		# Simlink *csv.txt this to your *.csv to dodge export badness
 		# Windows does not seem to correctly use simlinks, so for windows dev to work, we need to handle both
 		file = FileAccess.open(csv + ".txt", FileAccess.READ)
